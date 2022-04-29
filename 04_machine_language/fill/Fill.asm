@@ -11,4 +11,40 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
 
-// Put your code here.
+(LOOP)
+    @SCREEN
+    D=A
+    @currpixelgrp
+    M=D         // currpixelgrp = *SCREEN; top left 16 pixels
+    @KBD
+    D=M         // D = *KBD
+    @NOKEYPRESS
+    D;JEQ       // if (*KBD == 0) GOTO NOKEYPRESS
+    @KEYPRESS
+    0;JEQ       // if (*KBD != 0) GOTO KEYPRESS
+(DRAW)
+    @currpixelgrp
+    D=M         // D = *currpixelgrp
+    @KBD
+    D=D-A       // D -= KBD
+    @LOOP
+    D;JEQ       // GOTO LOOP
+    @pixels
+    D=M         // D = *pixels
+    @currpixelgrp
+    A=M
+    M=D         // *currpixelgrp = *pixels
+    @currpixelgrp
+    M=M+1       // currpixelgrp++
+    @DRAW
+    0;JMP       // GOTO DRAW
+(NOKEYPRESS)
+    @pixels
+    M=0         // *pixels = 0; (BIN(000.0))
+    @DRAW
+    0;JMP       // GOTO DRAW
+(KEYPRESS)
+   @pixels
+   M=-1         // *pixels = -1; (BIN(111.1))
+   @DRAW
+   0;JMP        // GOTO DRAW

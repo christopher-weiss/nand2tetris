@@ -9,4 +9,21 @@
 // This program only needs to handle arguments that satisfy
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
-// Put your code here.
+    @R2
+    M=0         // reset r2 <- 0
+(LOOP)
+    @R1
+    D=M
+    @END
+    D;JLE       // if (r1 <= 0) => End
+    @R0
+    D=M
+    @R2
+    M=M+D       // r2 <- r2 + r0
+    @R1
+    M=M-1       // r1 <- r1 - 1
+    @LOOP
+    0;JMP
+(END)
+    @END
+    0;JMP       // infinite loop
