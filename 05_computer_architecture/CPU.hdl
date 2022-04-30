@@ -39,5 +39,69 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    //
+    // Control Unit
+    //
+    And(a=instruction[15], b=true, out=type);
+    And(a=instruction[12], b=true, out=a);
+    And(a=instruction[11], b=true, out=c1);
+    And(a=instruction[10], b=true, out=c2);
+    And(a=instruction[9], b=true, out=c3);
+    And(a=instruction[8], b=true, out=c4);
+    And(a=instruction[7], b=true, out=c5);
+    And(a=instruction[6], b=true, out=c6);
+    And(a=instruction[5], b=true, out=d1);
+    And(a=instruction[4], b=true, out=d2);
+    And(a=instruction[3], b=true, out=d3);
+    And(a=instruction[2], b=true, out=j1);
+    And(a=instruction[1], b=true, out=j2);
+    And(a=instruction[0], b=true, out=j3);
+
+	Not(in=type, out=cinstruction);
+	Mux16(a=outMcopy, b=instruction, sel=cinstruction, out=toa);
+
+    //
+    // A-Register
+    //
+	Or(a=cinstruction, b=d1, out=aload);
+	ARegister(in=toa, load=aload, out=areg, out[0..14]=addressM);
+
+    //
+    // D-Register
+    //
+	And(a=type, b=d2, out=tod);
+	DRegister(in=outMcopy, load=tod, out=dreg);
+
+    // Select A-Register or Memory[x] 
+	And(a=type, b=a, out=selectam);
+	Mux16(a=areg, b=inM, sel=selectam, out=aorm);
+	
+    //
+    // ALU
+    //
+	ALU(x=dreg, y=aorm, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=outM, out=outMcopy, zr=zr, ng=ng);
+
+    // Write to M?
+	And(a=type, b=d3, out=writeM);
+
+    //
+    // Program Counter
+    //
+
+    // Determine if we nee to jump (i.e. load PC with new address from A-register)
+	Not(in=ng, out=notng);
+	Not(in=zr, out=notzr);
+
+	And(a=type, b=j3, out=jgt);
+	And(a=notng, b=notzr, out=gt);
+	And(a=jgt, b=gt, out=jmp1);
+	And(a=type, b=j2, out=jeq);
+	And(a=jeq, b=zr, out=jmp2);
+	And(a=type, b=j1, out=jlt);
+	And(a=jlt, b=ng, out=jmp3);
+
+	Or(a=jmp1, b=jmp2, out=jmp1or2);
+	Or(a=jmp3, b=jmp1or2, out=loadpc);
+
+	PC(in=areg, load=loadpc, inc=true, reset=reset, out[0..14]=pc);
 }

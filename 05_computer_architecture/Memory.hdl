@@ -27,5 +27,16 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // addr[13..14] = 
+    // 00 -> lower half of RAM
+    // 01 -> upper half of RAM
+    // 10 -> screen memory-map
+    // 11 -> keyboard memory map (read only)
+
+    DMux4Way(in=load, sel=address[13..14], a=loadramlower, b=loadramupper, c=loadscreen, d=invalid);
+    Or(a=loadramlower, b=loadramupper, out=loadram);
+    RAM16K(in=in, load=loadram, address=address[0..13], out=outram);
+    Screen(in=in, load=loadscreen, address=address[0..12], out=outscreen);
+    Keyboard(out=outkbd);
+    Mux4Way16(a=outram, b=outram, c=outscreen, d=outkbd, sel=address[13..14], out=out);
 }
