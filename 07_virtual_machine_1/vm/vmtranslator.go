@@ -102,20 +102,6 @@ func not() []string {
 	op = append(op, "A=A+1")
 	op = append(op, "M=0")
 	return op
-	/*
-		op := []string{}
-		op = append(op, "@SP")
-		op = append(op, "D=D-1")
-		op = append(op, "M=D")
-		op = append(op, "A=D")
-		op = append(op, "D=M")
-		op = append(op, "A=A-1")
-		op = append(op, "D=-D")
-		op = append(op, "M=D")
-		op = append(op, "A=A+1")
-		op = append(op, "M=0")
-		return op
-	*/
 }
 
 func or() []string {
