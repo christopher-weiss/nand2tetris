@@ -101,6 +101,8 @@ func not() []string {
 	op = append(op, "M=D")
 	op = append(op, "A=A+1")
 	op = append(op, "M=0")
+	op = append(op, "@SP")
+	op = append(op, "AM=M+1")
 	return op
 }
 
