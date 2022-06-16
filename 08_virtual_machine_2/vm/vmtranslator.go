@@ -35,8 +35,8 @@ var loopCount = 0
 var callCount = 0
 
 func main() {
-	file := openFile()
-	commands := parse(file)
+	files := openFiles()
+	commands := parse(files)
 	fmt.Println(commands)
 	op := translateToAssembly(commands)
 	writeFile(op)
@@ -491,29 +491,36 @@ func gotoIf(label string) []string {
 	return op
 }
 
-func openFile() *os.File {
+func openFiles() []*os.File {
 	if len(os.Args) <= 1 {
 		fmt.Println("No path to file provided: vmtranslator <filepath>")
 		os.Exit(1)
 	}
 
-	file, error := os.Open(os.Args[1])
-
-	if error != nil {
-		fmt.Println("Could not open file")
-		os.Exit(1)
+	files := []*os.File{}
+	for i,arg := range os.Args {
+		if i > 0 {
+			file, error := os.Open(arg)
+			files = append(files, file)
+			if error != nil {
+					fmt.Println("Could not open file")
+					os.Exit(1)
+			}
+		}
 	}
 
-	return file
+	return files
 }
 
-func parse(file *os.File) []Command {
+func parse(files []*os.File) []Command {
 	var commands []Command
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		var command, err = parseLine(scanner.Text())
-		if err == nil {
-			commands = append(commands, command)
+	for _,file := range(files) {
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			var command, err = parseLine(scanner.Text())
+			if err == nil {
+				commands = append(commands, command)
+			}
 		}
 	}
 	return commands
